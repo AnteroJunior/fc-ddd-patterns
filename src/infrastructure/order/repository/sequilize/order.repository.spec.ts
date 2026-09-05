@@ -52,7 +52,7 @@ describe("Order repository test", () => {
       product.name,
       product.price,
       product.id,
-      2
+      2,
     );
 
     const order = new Order("123", "123", [orderItem]);
@@ -80,5 +80,40 @@ describe("Order repository test", () => {
         },
       ],
     });
+  });
+
+  it("should find an existing order", async () => {
+    const customerRepository = new CustomerRepository();
+    const customer = new Customer("123", "Customer 1");
+    const address = new Address("Street 1", 1, "Zipcode 1", "City 1");
+    customer.changeAddress(address);
+    await customerRepository.create(customer);
+
+    const productRepository = new ProductRepository();
+    const product = new Product("123", "Product 1", 10);
+    await productRepository.create(product);
+
+    const orderItem = new OrderItem(
+      "1",
+      product.name,
+      product.price,
+      product.id,
+      2,
+    );
+
+    const order = new Order("123", "123", [orderItem]);
+
+    const orderRepository = new OrderRepository();
+    await orderRepository.create(order);
+    const foundOrder = await orderRepository.find("123");
+
+    expect(foundOrder).toStrictEqual(order);
+  });
+
+  it("should throw error for an non-existent order", async () => {
+    const orderRepository = new OrderRepository();
+    expect(async () => {
+      await orderRepository.find("123");
+    }).rejects.toThrow("Order not found");
   });
 });
