@@ -36,24 +36,28 @@ describe("Order repository test", () => {
     await sequelize.close();
   });
 
+  const createCustomer = async () => {
+    await CustomerModel.create({
+      id: "123",
+      name: "Customer 1",
+      street: "Street 1",
+      number: 1,
+      zipcode: "Zipcode 1",
+      city: "City 1",
+      active: true,
+      rewardPoints: 0,
+    });
+  };
+
+  const createProduct = async (id = "123", name = "Product 1", price = 10) => {
+    await ProductModel.create({ id, name, price });
+  };
+
   it("should create a new order", async () => {
-    const customerRepository = new CustomerRepository();
-    const customer = new Customer("123", "Customer 1");
-    const address = new Address("Street 1", 1, "Zipcode 1", "City 1");
-    customer.changeAddress(address);
-    await customerRepository.create(customer);
+    createCustomer();
+    createProduct();
 
-    const productRepository = new ProductRepository();
-    const product = new Product("123", "Product 1", 10);
-    await productRepository.create(product);
-
-    const orderItem = new OrderItem(
-      "1",
-      product.name,
-      product.price,
-      product.id,
-      2,
-    );
+    const orderItem = new OrderItem("1", "Product 1", 10, "123", 2);
 
     const order = new Order("123", "123", [orderItem]);
 
@@ -83,23 +87,10 @@ describe("Order repository test", () => {
   });
 
   it("should find an existing order", async () => {
-    const customerRepository = new CustomerRepository();
-    const customer = new Customer("123", "Customer 1");
-    const address = new Address("Street 1", 1, "Zipcode 1", "City 1");
-    customer.changeAddress(address);
-    await customerRepository.create(customer);
+    createCustomer();
+    createProduct();
 
-    const productRepository = new ProductRepository();
-    const product = new Product("123", "Product 1", 10);
-    await productRepository.create(product);
-
-    const orderItem = new OrderItem(
-      "1",
-      product.name,
-      product.price,
-      product.id,
-      2,
-    );
+    const orderItem = new OrderItem("1", "Product 1", 10, "123", 2);
 
     const order = new Order("123", "123", [orderItem]);
 
@@ -115,5 +106,47 @@ describe("Order repository test", () => {
     expect(async () => {
       await orderRepository.find("123");
     }).rejects.toThrow("Order not found");
+  });
+
+  it("should return existing orders", async () => {
+    createCustomer();
+    createProduct();
+
+    const orderRepository = new OrderRepository();
+
+    const orderItem = new OrderItem("1", "Product 1", 10, "123", 2);
+    const order = new Order("123", "123", [orderItem]);
+    await orderRepository.create(order);
+
+    const foundOrders = await orderRepository.findAll();
+
+    expect(foundOrders.length).toBe(1);
+  });
+
+  it("should return multiple orders", async () => {
+    createCustomer();
+    createProduct();
+    createProduct("1234", "Product 2", 20);
+
+    const orderRepository = new OrderRepository();
+
+    const orderItem = new OrderItem("1", "Product 1", 10, "123", 2);
+    const order = new Order("123", "123", [orderItem]);
+    await orderRepository.create(order);
+
+    const orderItem2 = new OrderItem("2", "Product 2", 20, "1234", 2);
+    const order2 = new Order("1234", "123", [orderItem2]);
+    await orderRepository.create(order2);
+
+    const foundOrders = await orderRepository.findAll();
+
+    expect(foundOrders.length).toBe(2);
+  });
+
+  it("should return empty array when there is no orders", async () => {
+    const orderRepository = new OrderRepository();
+    const orders = await orderRepository.findAll();
+    expect(orders.length).toBe(0);
+    expect(orders).toStrictEqual([]);
   });
 });
