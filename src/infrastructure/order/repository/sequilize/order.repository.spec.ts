@@ -36,9 +36,9 @@ describe("Order repository test", () => {
     await sequelize.close();
   });
 
-  const createCustomer = async () => {
+  const createCustomer = async (id = "123") => {
     await CustomerModel.create({
-      id: "123",
+      id,
       name: "Customer 1",
       street: "Street 1",
       number: 1,
@@ -148,5 +148,64 @@ describe("Order repository test", () => {
     const orders = await orderRepository.findAll();
     expect(orders.length).toBe(0);
     expect(orders).toStrictEqual([]);
+  });
+
+  it("should update when adding item", async () => {
+    createCustomer();
+    createProduct();
+    createProduct("1234", "Product 2", 10);
+
+    const orderRepository = new OrderRepository();
+
+    const orderItem = new OrderItem("1", "Product 1", 10, "123", 2);
+    const order = new Order("123", "123", [orderItem]);
+    await orderRepository.create(order);
+
+    const orderItem2 = new OrderItem("2", "Product 2", 10, "1234", 2);
+    const updatedOrder = new Order("123", "123", [orderItem, orderItem2]);
+
+    await orderRepository.update(updatedOrder);
+
+    const orderModel = await orderRepository.find("123");
+
+    expect(orderModel).toEqual(updatedOrder);
+  });
+
+  it("should update when removing item", async () => {
+    createCustomer();
+    createProduct();
+    createProduct("1234", "Product 2", 10);
+
+    const orderRepository = new OrderRepository();
+    const orderItem = new OrderItem("1", "Product 1", 10, "123", 2);
+    const orderItem2 = new OrderItem("2", "Product 2", 10, "1234", 2);
+    const order = new Order("123", "123", [orderItem, orderItem2]);
+    await orderRepository.create(order);
+
+    const updatedOrder = new Order("123", "123", [orderItem]);
+    await orderRepository.update(updatedOrder);
+
+    const orderModel = await orderRepository.find("123");
+
+    expect(orderModel).toEqual(updatedOrder);
+  });
+
+  it("should update customer_id", async () => {
+    createCustomer();
+    createCustomer("1234");
+    createProduct();
+
+    const orderRepository = new OrderRepository();
+    const orderItem = new OrderItem("1", "Product 1", 10, "123", 2);
+    const order = new Order("123", "123", [orderItem]);
+    await orderRepository.create(order);
+
+    const updatedOrder = new Order("123", "1234", [orderItem]);
+    await orderRepository.update(updatedOrder);
+
+    const orderModel = await orderRepository.find("123");
+
+    expect(orderModel).toEqual(updatedOrder);
+    expect(orderModel.customerId).toBe("1234");
   });
 });

@@ -6,8 +6,31 @@ import OrderModel from "./order.model";
 import OrderItem from "../../../../domain/checkout/entity/order_item";
 
 export default class OrderRepository implements OrderRepositoryInterface {
-  update(entity: Order): Promise<void> {
-    throw new Error("Method not implemented.");
+  async update(entity: Order): Promise<void> {
+    await OrderModel.update(
+      {
+        customer_id: entity.customerId,
+        total: entity.total(),
+      },
+      { where: { id: entity.id } },
+    );
+
+    await OrderItemModel.destroy({
+      where: {
+        order_id: entity.id,
+      },
+    });
+
+    await OrderItemModel.bulkCreate(
+      entity.items.map((item) => ({
+        id: item.id,
+        name: item.name,
+        product_id: item.productId,
+        price: item.price,
+        order_id: entity.id,
+        quantity: item.quantity,
+      })),
+    );
   }
 
   async find(id: string): Promise<Order> {
@@ -54,7 +77,7 @@ export default class OrderRepository implements OrderRepositoryInterface {
       );
       return new Order(order.id, order.customer_id, items);
     });
-    
+
     return orders;
   }
 
