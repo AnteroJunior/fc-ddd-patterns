@@ -52,17 +52,23 @@ Toda a implementação deve ser coberta por testes unitários que assegurem que 
 git clone https://github.com/AnteroJunior/fc-ddd-patterns.git
 ```
 
-2. Mude para a branch `domain-events`:
+2. Acesse o projeto:
+
+```bash
+cd fc-ddd-patterns
+```
+
+3. Mude para a branch `domain-events`:
 ```bash
 git switch domain-events
 ```
 
-3. Instale os pacotes, rode o comando:
+4. Instale os pacotes, rode o comando:
 ```bash 
 npm i
 ```
 
-4. Execute os testes existentes no projeto:
+5. Execute os testes existentes no projeto:
 ```bash 
 npm test
 ```
