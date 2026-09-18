@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Neste desafio, você deve aplicar conceitos de Domain Driven Design e TDD (Test Driven Development). Sua missão é completar a implementação da camada de infraestrutura de uma aplicação de vendas, garantindo que o repositório de pedidos (OrderRepository) funcione exatamente como definido em sua interface.
+Aplicar o conceito de Domain Events na prática. Você deve implementar a publicação e a assinatura de eventos de domínio na criação e atualização de um cliente (Customer), garantindo que o sistema reaja a essas mudanças de estado conforme os requisitos de log abaixo.
 
 ## Tecnologias e Ferramentas
 
@@ -18,16 +18,29 @@ https://github.com/devfullcycle/fc-ddd-patterns.git
 
 ## Requisitos Técnicos
 
-**Implementação da Classe:** Você deve completar a classe OrderRepository.
+Você deve criar dois eventos de domínio distintos para o agregado Customer:
 
-**Cumprimento de Contrato:** A classe deve implementar totalmente os métodos definidos na interface OrderRepositoryInterface.
+### 1. Evento: CustomerCreated
 
-Verifique métodos como create, update, find, findAll, etc., conforme definidos no código base.
+**Gatilho**: Deve ser disparado sempre que um novo Customer é criado.
 
-**Testes Automatizados:** Toda a implementação deve ser validada por testes.
-Os testes devem garantir que os dados estão sendo manipulados corretamente (criação, recuperação e atualização de Orders).
+**Comportamento**: Ao ser disparado, esse evento deve executar dois Handlers independentes:
 
-**Critério de Aceite:** Ao rodar o comando de testes (ex: npm test), todos os testes devem passar (ficar verdes).
+**Handler 1 (EnviaConsoleLog1Handler)**: Deve imprimir no console: "Esse é o primeiro console.log do evento: CustomerCreated"
+
+**Handler 2 (EnviaConsoleLog2Handler)**: Deve imprimir no console: "Esse é o segundo console.log do evento: CustomerCreated"
+
+### 2. Evento: CustomerAddressChanged
+
+**Gatilho**: Deve ser disparado quando o endereço do Customer é trocado.
+
+**Dados**: O evento deve transportar o id, o nome e o novo endereço do cliente.
+
+**Comportamento**: Deve executar um Handler (EnviaConsoleLogHandler) que imprime no console: "Endereço do cliente: {id}, {nome} alterado para: {endereco}"
+
+## Validação
+
+Toda a implementação deve ser coberta por testes unitários que assegurem que os eventos estão sendo disparados e os handlers executados corretamente.
 
 ## Instalação e testes
 
@@ -39,12 +52,17 @@ Os testes devem garantir que os dados estão sendo manipulados corretamente (cri
 git clone https://github.com/AnteroJunior/fc-ddd-patterns.git
 ```
 
-2. Instale os pacotes, rode o comando:
+2. Mude para a branch `domain-events`:
+```bash
+git switch domain-events
+```
+
+3. Instale os pacotes, rode o comando:
 ```bash 
 npm i
 ```
 
-3. Execute os testes existentes no projeto:
+4. Execute os testes existentes no projeto:
 ```bash 
 npm test
 ```
